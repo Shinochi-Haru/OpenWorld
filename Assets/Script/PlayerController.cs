@@ -41,11 +41,7 @@ public class PlayerController : MonoBehaviour
         //è„è∏Ç∑ÇÈ
         if (Input.GetKey(KeyCode.Space))
         {
-            _rb.AddForce(Vector3.up * _upPower);
-        }
-        else
-        {
-            _rb.velocity = Vector3.zero;
+            _rb.AddForce(Vector3.up * _upPower,ForceMode.Impulse);
         }
     }
 }

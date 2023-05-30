@@ -14,6 +14,9 @@ public class EnemyController : MonoBehaviour
     private float idleTimer; // アイドル状態の経過時間
     private float idleDuration = 100f; // アイドル状態の持続時間
     private Vector3 idleDestination; // アイドル時の目的地
+    [SerializeField] Transform player; // プレイヤーのTransformコンポーネント
+    [SerializeField] float chaseRadius = 20f; // 追跡半径
+    float distanceToPlayer = 0f;
 
     private void Start()
     {
@@ -36,6 +39,8 @@ public class EnemyController : MonoBehaviour
                 UpdateAttackState();
                 break;
         }
+        // プレイヤーと敵の距離を計算
+        distanceToPlayer = Vector3.Distance(transform.position, player.position);
     }
 
     private void UpdateIdleState()
@@ -43,12 +48,17 @@ public class EnemyController : MonoBehaviour
         // アイドル状態の処理
         idleTimer += Time.deltaTime;
 
-        if (idleTimer >= idleDuration)
+        if (distanceToPlayer <= chaseRadius)// プレイヤーが追跡半径に近づいた場合
         {
-            // 追跡状態への遷移条件
             currentState = EnemyState.Chase;
-            idleTimer = 0f;
         }
+
+        //if (idleTimer >= idleDuration)
+        //{
+        //    // 追跡状態への遷移条件
+
+        //    idleTimer = 0f;
+        //}
         else
         {
             // ランダムな方向に歩き回る
@@ -65,15 +75,22 @@ public class EnemyController : MonoBehaviour
 
     private void UpdateChaseState()
     {
-        // 追跡状態の処理
-        // 例えば、プレイヤーを追いかける処理を実行
-        // 必要に応じて攻撃状態への遷移条件を設定
+        // プレイヤーの方向を向く
+        Vector3 direction = (player.position - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0f, direction.z));
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+
+        // プレイヤーに向かって移動する
+        transform.position = Vector3.MoveTowards(transform.position, player.position, Time.deltaTime * 5f);
+
+        if (distanceToPlayer >= chaseRadius)// プレイヤーが追跡半径の範囲外の場合
+        {
+            currentState = EnemyState.Idle;
+        }
     }
 
     private void UpdateAttackState()
     {
-        // 攻撃状態の処理
-        // 例えば、プレイヤーへの攻撃を実行
-        // 必要に応じて別のステートへの遷移条件を設定
+        
     }
 }

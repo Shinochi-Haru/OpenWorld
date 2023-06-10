@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class PlayerController : MonoBehaviour
 {
     [SerializeField]public float speed = 10.0f;                     // キャラクターの移動速度
@@ -19,6 +20,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _jumpPower;
     [SerializeField] LayerMask groundLayer; // 地面と判定するレイヤー
     private Vector3 _groundCheckStartOffset;
+    bool _isGrounded;
 
     void Start()
     {
@@ -36,6 +38,10 @@ public class PlayerController : MonoBehaviour
         moveFB = Input.GetAxis("Horizontal") * speed;      // 水平方向（左右）の入力に基づいて移動量を計算
         moveLR = Input.GetAxis("Vertical") * speed;        // 垂直方向（前後）の入力に基づいて移動量を計算
 
+        movement = new Vector3(moveFB, gravity, moveLR);   // 移動量をベクトルとして設定
+        movement = transform.rotation * movement;            // 移動量をキャラクターのローカル座標系に変換
+        rb.velocity = movement;
+
         rotX = Input.GetAxis("Mouse X") * sensitivity;     // マウスの X 軸移動量に基づいて横回転量を計算
         rotY = Input.GetAxis("Mouse Y") * sensitivity;     // マウスの Y 軸移動量に基づいて縦回転量を計算
 
@@ -50,10 +56,34 @@ public class PlayerController : MonoBehaviour
         {
             CameraRotation(cam, rotX, rotY);                 // WebGL での右クリック回転が無効な場合、常にマウスの移動量に基づいてカメラを回転
         }
+    }
 
+    void CheckForWaterHeight()
+    {
+        if (transform.position.y < WaterHeight)
+        {
+            gravity = 0f;                                  // キャラクターが水面より下にいる場合は重力を無効化
+        }
+        else
+        {
+            gravity = -9.8f;                               // キャラクターが水面より上にいる場合は重力を有効化
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        //CheckForWaterHeight();                             // 水面の高さをチェックし、必要に応じて重力を調整
+        //_isGround = IsGrounded();
+        if (_isGrounded && Input.GetButtonDown("Jump"))
+        {
+            rb.AddForce(transform.up * _jumpPower, ForceMode.Impulse);
+        }
+    }
+
+    void LateUpdate()
+    {
         if (Input.GetKey("w"))
         {
-            // キャラクターが移動中の場合は走るアニメーションを再生
             animator.SetFloat("IsRunning", movement.magnitude);
         }
         else
@@ -64,62 +94,17 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
         {
 
-            animator.SetBool("Ground", true);
+            animator.SetBool("Ground", _isGrounded);
+        }
+        else if(_isGrounded == false)
+        {
+            animator.SetBool("Ground", _isGrounded);
         }
         else
         {
-            animator.SetBool("Ground", false);
+            animator.SetBool("Ground", _isGrounded);
         }
     }
-
-    //void CheckForWaterHeight()
-    //{
-    //    if (transform.position.y < WaterHeight)
-    //    {
-    //        gravity = 0f;                                  // キャラクターが水面より下にいる場合は重力を無効化
-    //    }
-    //    else
-    //    {
-    //        gravity = -9.8f;                               // キャラクターが水面より上にいる場合は重力を有効化
-    //    }
-    //}
-
-    private void FixedUpdate()
-    {
-        //CheckForWaterHeight();                             // 水面の高さをチェックし、必要に応じて重力を調整
-        _isGround = IsGrounded();
-        if (_isGround && Input.GetButtonDown("Jump"))
-        {
-            rb.AddForce(transform.up * _jumpPower, ForceMode.VelocityChange);
-        }
-
-        movement = new Vector3(moveFB, gravity, moveLR);   // 移動量をベクトルとして設定
-        movement = transform.rotation * movement;            // 移動量をキャラクターのローカル座標系に変換
-        rb.velocity = movement;
-    }
-
-    //void LateUpdate()
-    //{
-    //    if (Input.GetKey("w"))
-    //    {
-    //        // キャラクターが移動中の場合は走るアニメーションを再生
-    //        animator.SetFloat("IsRunning", movement.magnitude);
-    //    }
-    //    else
-    //    {
-    //        animator.SetFloat("IsRunning", 0f);
-    //    }
-
-    //    if (Input.GetButtonDown("Jump"))
-    //    {
-
-    //        animator.SetBool("Ground", true);
-    //    }
-    //    else
-    //    {
-    //        animator.SetBool("Ground", false);
-    //    }
-    //}
 
     void CameraRotation(GameObject cam, float rotX, float rotY)
     {
@@ -127,23 +112,36 @@ public class PlayerController : MonoBehaviour
         cam.transform.Rotate(-rotY * Time.deltaTime, 0, 0);  // カメラを縦回転
     }
 
-    bool IsGrounded()
+    ////bool IsGrounded()
+    ////{
+    ////    レイキャストを発射する開始地点と方向を設定
+    ////   Vector3 rayStart = transform.position + _groundCheckStartOffset;
+    ////    Vector3 rayDirection = Vector3.down;
+
+    ////    レイキャストを発射して地面との当たり判定を取得
+    ////    if (Physics.Raycast(rayStart, rayDirection, out RaycastHit hit, Mathf.Infinity, groundLayer))
+    ////    {
+    ////        地面との距離が一定以下であれば接地していると判定する
+    ////        float groundDistanceThreshold = 1f;
+    ////        if (hit.distance <= groundDistanceThreshold)
+    ////        {
+    ////            return true;
+    ////        }
+    ////    }
+
+    ////    return false;
+    ////}
+    private void OnTriggerEnter(Collider other)
     {
-        // レイキャストを発射する開始地点と方向を設定
-        Vector3 rayStart = transform.position + _groundCheckStartOffset;
-        Vector3 rayDirection = Vector3.down;
+        _isGrounded = true;
+    }
 
-        // レイキャストを発射して地面との当たり判定を取得
-        if (Physics.Raycast(rayStart, rayDirection, out RaycastHit hit, Mathf.Infinity, groundLayer))
-        {
-            // 地面との距離が一定以下であれば接地していると判定する
-            float groundDistanceThreshold = 0.1f;
-            if (hit.distance <= groundDistanceThreshold)
-            {
-                return true;
-            }
-        }
-
-        return false;
+    private void OnTriggerStay(Collider other)
+    {
+        _isGrounded = true;
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        _isGrounded = false;
     }
 }

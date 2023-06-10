@@ -7,7 +7,7 @@ public class CharController_Motor : MonoBehaviour
     public float speed = 10.0f;                     // キャラクターの移動速度
     public float sensitivity = 30.0f;               // マウスの感度
     public float WaterHeight = 15.5f;               // 水面の高さ
-    CharacterController character;                   // CharacterController コンポーネントへの参照
+    CharacterController character;
     public GameObject cam;                          // カメラオブジェクトへの参照
     float moveFB, moveLR;                            // 前後左右の移動量
     float rotX, rotY;                                // マウスの回転量

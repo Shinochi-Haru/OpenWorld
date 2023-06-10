@@ -17,9 +17,8 @@ public class PlayerController : MonoBehaviour
     Vector3 movement;
     bool _isGround = false;
     [SerializeField] float _jumpPower;
-    [Tooltip("地面と判定するレイヤーを設定する")] [SerializeField] LayerMask _groundLayer;
-    [Tooltip("接地判定の開始地点に対する Pivot からのオフセット")] [SerializeField] Vector3 _groundCheckStartOffset = Vector3.zero;
-    [Tooltip("接地判定の終点に対する Pivot からのオフセット")] [SerializeField] Vector3 _groundCheckEndOffset = Vector3.zero;
+    [SerializeField] LayerMask groundLayer; // 地面と判定するレイヤー
+    private Vector3 _groundCheckStartOffset;
 
     void Start()
     {
@@ -30,11 +29,7 @@ public class PlayerController : MonoBehaviour
             webGLRightClickRotation = false;                // エディタ上では WebGL での右クリック回転を無効化
             sensitivity = sensitivity * 1.5f;               // エディタ上では感度を1.5倍に増やす
         }
-    }
-    private void OnCollisionEnter(Collision collision)
-    {
-        
-    }
+    } 
 
     private void Update()
     {
@@ -55,6 +50,26 @@ public class PlayerController : MonoBehaviour
         {
             CameraRotation(cam, rotX, rotY);                 // WebGL での右クリック回転が無効な場合、常にマウスの移動量に基づいてカメラを回転
         }
+
+        if (Input.GetKey("w"))
+        {
+            // キャラクターが移動中の場合は走るアニメーションを再生
+            animator.SetFloat("IsRunning", movement.magnitude);
+        }
+        else
+        {
+            animator.SetFloat("IsRunning", 0f);
+        }
+
+        if (Input.GetButtonDown("Jump"))
+        {
+
+            animator.SetBool("Ground", true);
+        }
+        else
+        {
+            animator.SetBool("Ground", false);
+        }
     }
 
     //void CheckForWaterHeight()
@@ -71,44 +86,64 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Vector3 start = _groundCheckStartOffset + transform.position;
-        Vector3 end = _groundCheckEndOffset + transform.position;
-        Debug.DrawLine(start, end);
-        _isGround = Physics.Linecast(start, end, _groundLayer);
-
         //CheckForWaterHeight();                             // 水面の高さをチェックし、必要に応じて重力を調整
-
-        movement = new Vector3(moveFB, gravity, moveLR);   // 移動量をベクトルとして設定
-
-        movement = transform.rotation * movement;            // 移動量をキャラクターのローカル座標系に変換
-        rb.velocity = movement;
-
-        if(Input.GetButtonDown("Jump"))
+        _isGround = IsGrounded();
+        if (_isGround && Input.GetButtonDown("Jump"))
         {
             rb.AddForce(transform.up * _jumpPower, ForceMode.VelocityChange);
         }
+
+        movement = new Vector3(moveFB, gravity, moveLR);   // 移動量をベクトルとして設定
+        movement = transform.rotation * movement;            // 移動量をキャラクターのローカル座標系に変換
+        rb.velocity = movement;
     }
 
-    void LateUpdate()
-    {
-        if (Input.GetKey("w"))
-        {
-            // キャラクターが移動中の場合は走るアニメーションを再生
-            animator.SetFloat("IsRunning", movement.magnitude);
-        }
-        else
-        {
-            animator.SetFloat("IsRunning", 0f);
-        }
-    }
+    //void LateUpdate()
+    //{
+    //    if (Input.GetKey("w"))
+    //    {
+    //        // キャラクターが移動中の場合は走るアニメーションを再生
+    //        animator.SetFloat("IsRunning", movement.magnitude);
+    //    }
+    //    else
+    //    {
+    //        animator.SetFloat("IsRunning", 0f);
+    //    }
+
+    //    if (Input.GetButtonDown("Jump"))
+    //    {
+
+    //        animator.SetBool("Ground", true);
+    //    }
+    //    else
+    //    {
+    //        animator.SetBool("Ground", false);
+    //    }
+    //}
 
     void CameraRotation(GameObject cam, float rotX, float rotY)
     {
         transform.Rotate(0, rotX * Time.deltaTime, 0);       // キャラクターを横回転
-        if (Input.GetButtonDown("Jump"))
+        cam.transform.Rotate(-rotY * Time.deltaTime, 0, 0);  // カメラを縦回転
+    }
+
+    bool IsGrounded()
+    {
+        // レイキャストを発射する開始地点と方向を設定
+        Vector3 rayStart = transform.position + _groundCheckStartOffset;
+        Vector3 rayDirection = Vector3.down;
+
+        // レイキャストを発射して地面との当たり判定を取得
+        if (Physics.Raycast(rayStart, rayDirection, out RaycastHit hit, Mathf.Infinity, groundLayer))
         {
-            cam.transform.Rotate(-rotY * Time.deltaTime, 0, 0);  // カメラを縦回転
+            // 地面との距離が一定以下であれば接地していると判定する
+            float groundDistanceThreshold = 0.1f;
+            if (hit.distance <= groundDistanceThreshold)
+            {
+                return true;
+            }
         }
-        //cam.transform.Rotate(-rotY * Time.deltaTime, 0, 0);  // カメラを縦回転
+
+        return false;
     }
 }

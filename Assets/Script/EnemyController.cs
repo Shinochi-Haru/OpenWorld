@@ -52,13 +52,6 @@ public class EnemyController : MonoBehaviour
         {
             currentState = EnemyState.Chase;
         }
-
-        //if (idleTimer >= idleDuration)
-        //{
-        //    // ’ÇÕó‘Ô‚Ö‚Ì‘JˆÚğŒ
-
-        //    idleTimer = 0f;
-        //}
         else
         {
             // ƒ‰ƒ“ƒ_ƒ€‚È•ûŒü‚É•à‚«‰ñ‚é

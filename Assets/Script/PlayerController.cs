@@ -16,7 +16,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField]float gravity = -9.8f;                           // 重力の値
     private Animator animator;
     Vector3 movement;
-    bool _isGround = false;
     [SerializeField] float _jumpPower;
     [SerializeField] LayerMask groundLayer; // 地面と判定するレイヤー
     private Vector3 _groundCheckStartOffset;
@@ -66,13 +65,13 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            gravity = -9.8f;                               // キャラクターが水面より上にいる場合は重力を有効化
+            gravity = -5f;                               // キャラクターが水面より上にいる場合は重力を有効化
         }
     }
 
     private void FixedUpdate()
     {
-        //CheckForWaterHeight();                             // 水面の高さをチェックし、必要に応じて重力を調整
+        CheckForWaterHeight();                             // 水面の高さをチェックし、必要に応じて重力を調整
         //_isGround = IsGrounded();
         if (_isGrounded && Input.GetButtonDown("Jump"))
         {

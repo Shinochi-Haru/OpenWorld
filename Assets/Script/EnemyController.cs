@@ -13,16 +13,20 @@ public class EnemyController : MonoBehaviour
 
     private EnemyState currentState; // 現在のステート
     private float idleTimer; // アイドル状態の経過時間
-    private float idleDuration = 100f; // アイドル状態の持続時間
     private Vector3 idleDestination; // アイドル時の目的地
     [SerializeField] Transform player; // プレイヤーのTransformコンポーネント
-    [SerializeField] float chaseRadius = 20f; // 追跡半径
+    [SerializeField] float _chaseRadius = 20f; // 追跡半径
+    [SerializeField] float _attackRadius = 20f; // 追跡半径
     float distanceToPlayer = 0f;
     [SerializeField]private float moveTimer; // 方向転換のタイマー
     private float moveDuration = 10f; // 方向転換の間隔
     private Vector3 randomDestination; // ランダムな目的地
     [SerializeField] private float moveRadius = 10f; // 移動範囲の半径
     private Vector3 initialPosition; // 初期位置
+    [SerializeField] float _walkSpeed = 0;
+    [SerializeField] float _chaseSpeed = 0;
+    private Animator _anim; // Animatorコンポーネント
+    public Collider _enemyAttackCollider;
 
 
     private void Start()
@@ -34,6 +38,8 @@ public class EnemyController : MonoBehaviour
         initialPosition = transform.position;
         // 初期のランダムな目的地を設定
         SetRandomDestination();
+
+        _anim = GetComponent<Animator>();
     }
 
     private void Update()
@@ -61,7 +67,7 @@ public class EnemyController : MonoBehaviour
         idleTimer += Time.deltaTime;
         moveTimer += Time.deltaTime;
 
-        if (distanceToPlayer <= chaseRadius) // プレイヤーが追跡半径に近づいた場合
+        if (distanceToPlayer <= _chaseRadius) // プレイヤーが追跡半径に近づいた場合
         {
             currentState = EnemyState.Chase;
         }
@@ -74,7 +80,7 @@ public class EnemyController : MonoBehaviour
                 moveTimer = 0f;
             }
             // 目的地に向かって移動
-            transform.position = Vector3.MoveTowards(transform.position, randomDestination, 2f * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, randomDestination, _walkSpeed* Time.deltaTime);
 
             // 進んでいる方向に向きを変える
             Vector3 direction = randomDestination - transform.position;
@@ -94,17 +100,29 @@ public class EnemyController : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
 
         // プレイヤーに向かって移動する
-        transform.position = Vector3.MoveTowards(transform.position, player.position, Time.deltaTime * 5f);
+        transform.position = Vector3.MoveTowards(transform.position, player.position, Time.deltaTime * _chaseSpeed);
+        //_anim.SetBool("Chase",_chaseAnim);
+        _anim.SetTrigger("Chase");
 
-        if (distanceToPlayer >= chaseRadius)// プレイヤーが追跡半径の範囲外の場合
+        if (distanceToPlayer >= _chaseRadius)// プレイヤーが追跡半径の範囲外の場合
         {
             currentState = EnemyState.Idle;
         }
+        if (distanceToPlayer <= _attackRadius)// プレイヤーが追跡半径の範囲内の場合
+        {
+            currentState = EnemyState.Attack;
+        }
+
     }
 
     private void UpdateAttackState()
     {
-        
+        if (distanceToPlayer >= _attackRadius && distanceToPlayer <= _chaseRadius)// プレイヤーが追跡半径の範囲外の場合
+        {
+            currentState = EnemyState.Chase;
+        }
+
+        _anim.SetTrigger("EnemyAttack");
     }
 
     private void SetRandomDestination()
@@ -113,5 +131,25 @@ public class EnemyController : MonoBehaviour
         Vector2 randomDirection = Random.insideUnitCircle.normalized;
         Vector3 direction3D = new Vector3(randomDirection.x, 0f, randomDirection.y);
         randomDestination = initialPosition + direction3D * Random.Range(0f, moveRadius);
+    }
+
+    //被ダメージアニメーションを発生させる
+    private void OnTriggerEnter(Collider other)
+    {
+        Damager damager = other.GetComponent<Damager>();
+        if (damager != null)
+        {
+            //敵の剣に当たったら被ダメアニメーション発生
+            _anim.SetTrigger("Damage");
+        }
+    }
+    //武器の判定を有効or無効切り替える
+    public void OffColliderAttack()
+    {
+        _enemyAttackCollider.enabled = false;
+    }
+    public void OnColliderAttack()
+    {
+        _enemyAttackCollider.enabled = true;
     }
 }

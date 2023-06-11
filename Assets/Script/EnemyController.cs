@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemyController : MonoBehaviour
 {
@@ -17,11 +18,22 @@ public class EnemyController : MonoBehaviour
     [SerializeField] Transform player; // プレイヤーのTransformコンポーネント
     [SerializeField] float chaseRadius = 20f; // 追跡半径
     float distanceToPlayer = 0f;
+    [SerializeField]private float moveTimer; // 方向転換のタイマー
+    private float moveDuration = 10f; // 方向転換の間隔
+    private Vector3 randomDestination; // ランダムな目的地
+    [SerializeField] private float moveRadius = 10f; // 移動範囲の半径
+    private Vector3 initialPosition; // 初期位置
+
 
     private void Start()
     {
         // 初期状態を設定
         currentState = EnemyState.Idle;
+
+        // 初期位置を保存
+        initialPosition = transform.position;
+        // 初期のランダムな目的地を設定
+        SetRandomDestination();
     }
 
     private void Update()
@@ -47,22 +59,30 @@ public class EnemyController : MonoBehaviour
     {
         // アイドル状態の処理
         idleTimer += Time.deltaTime;
+        moveTimer += Time.deltaTime;
 
-        if (distanceToPlayer <= chaseRadius)// プレイヤーが追跡半径に近づいた場合
+        if (distanceToPlayer <= chaseRadius) // プレイヤーが追跡半径に近づいた場合
         {
             currentState = EnemyState.Chase;
         }
         else
         {
-            // ランダムな方向に歩き回る
-            if (Random.Range(0f, 1f) < 0.01f || Vector3.Distance(transform.position, idleDestination) < 1f)
+            if (moveTimer >= moveDuration || Vector3.Distance(transform.position, randomDestination) < 1f)
             {
-                // 10メートル以上移動する目的地を設定
-                Vector3 randomDirection = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
-                idleDestination = transform.position + randomDirection * Random.Range(20f, 40f);
+                // 方向転換の間隔が経過したか、目的地に近づいた場合は新しい目的地を設定
+                SetRandomDestination();
+                moveTimer = 0f;
             }
             // 目的地に向かって移動
-            transform.position = Vector3.MoveTowards(transform.position, idleDestination, 2f * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, randomDestination, 2f * Time.deltaTime);
+
+            // 進んでいる方向に向きを変える
+            Vector3 direction = randomDestination - transform.position;
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
+            }
         }
     }
 
@@ -85,5 +105,13 @@ public class EnemyController : MonoBehaviour
     private void UpdateAttackState()
     {
         
+    }
+
+    private void SetRandomDestination()
+    {
+        // ランダムな方向に移動する目的地を設定
+        Vector2 randomDirection = Random.insideUnitCircle.normalized;
+        Vector3 direction3D = new Vector3(randomDirection.x, 0f, randomDirection.y);
+        randomDestination = initialPosition + direction3D * Random.Range(0f, moveRadius);
     }
 }

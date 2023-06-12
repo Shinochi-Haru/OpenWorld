@@ -11,6 +11,7 @@ public class EnemyController : MonoBehaviour
         Attack
     }
 
+    HpController _hp;
     private EnemyState currentState; // 現在のステート
     private float idleTimer; // アイドル状態の経過時間
     private Vector3 idleDestination; // アイドル時の目的地
@@ -27,10 +28,14 @@ public class EnemyController : MonoBehaviour
     [SerializeField] float _chaseSpeed = 0;
     private Animator _anim; // Animatorコンポーネント
     public Collider _enemyAttackCollider;
-
+    private float attackTimer; // 近接攻撃のタイマー
+    [SerializeField]private float attackInterval = 3f; // 近接攻撃の間隔
+    private HpController _hpController;
 
     private void Start()
     {
+        //_chaseOnOff = false;
+        _enemyAttackCollider.enabled = false;
         // 初期状態を設定
         currentState = EnemyState.Idle;
 
@@ -39,6 +44,7 @@ public class EnemyController : MonoBehaviour
         // 初期のランダムな目的地を設定
         SetRandomDestination();
 
+        _hpController = GetComponent<HpController>();
         _anim = GetComponent<Animator>();
     }
 
@@ -102,15 +108,18 @@ public class EnemyController : MonoBehaviour
         // プレイヤーに向かって移動する
         transform.position = Vector3.MoveTowards(transform.position, player.position, Time.deltaTime * _chaseSpeed);
         //_anim.SetBool("Chase",_chaseAnim);
-        _anim.SetTrigger("Chase");
+        //_anim.SetTrigger("Chase");
+        _anim.SetBool("Chase", true);
 
         if (distanceToPlayer >= _chaseRadius)// プレイヤーが追跡半径の範囲外の場合
         {
             currentState = EnemyState.Idle;
+            _anim.SetBool("Chase", false);
         }
         if (distanceToPlayer <= _attackRadius)// プレイヤーが追跡半径の範囲内の場合
         {
             currentState = EnemyState.Attack;
+            _anim.SetBool("Chase", false);
         }
 
     }
@@ -121,8 +130,13 @@ public class EnemyController : MonoBehaviour
         {
             currentState = EnemyState.Chase;
         }
+        attackTimer += Time.deltaTime;
 
-        _anim.SetTrigger("EnemyAttack");
+        if (attackTimer >= attackInterval)
+        {
+            _anim.SetTrigger("EnemyAttack");
+            attackTimer = 0f;
+        }
     }
 
     private void SetRandomDestination()
@@ -141,6 +155,8 @@ public class EnemyController : MonoBehaviour
         {
             //敵の剣に当たったら被ダメアニメーション発生
             _anim.SetTrigger("Damage");
+            _hpController.Damage(damager.damage);
+            
         }
     }
     //武器の判定を有効or無効切り替える

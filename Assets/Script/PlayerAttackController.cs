@@ -6,12 +6,14 @@ public class PlayerAttackController : MonoBehaviour
 {
     Animator _anim;
     [SerializeField]public Collider attackCollider;
-    private HpController _hpController;
+    [SerializeField]HpController _hpController;
+    Damager damager;
     void Start()
     {
         attackCollider.enabled = false;
         _anim = GetComponent<Animator>();
         _hpController = GetComponent<HpController>();
+        damager = GetComponent<Damager>();
     }
 
     // Update is called once per frame
@@ -48,6 +50,7 @@ public class PlayerAttackController : MonoBehaviour
             //敵の剣に当たったら被ダメアニメーション発生
             _anim.SetTrigger("Damage");
             _hpController.Damage(damager.damage);
+            StartCoroutine(_hpController.Attacked(damager.damage));
         }
     }
 }

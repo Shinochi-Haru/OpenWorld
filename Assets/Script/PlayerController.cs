@@ -108,7 +108,7 @@ public class PlayerController : MonoBehaviour
     void CameraRotation(GameObject cam, float rotX, float rotY)
     {
         transform.Rotate(0, rotX * Time.deltaTime, 0);       // ƒLƒƒƒ‰ƒNƒ^[‚ğ‰¡‰ñ“]
-        cam.transform.Rotate(-rotY * Time.deltaTime, 0, 0);  // ƒJƒƒ‰‚ğc‰ñ“]
+        //cam.transform.Rotate(-rotY * Time.deltaTime, 0, 0);  // ƒJƒƒ‰‚ğc‰ñ“]
     }
 
     ////bool IsGrounded()

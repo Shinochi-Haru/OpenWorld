@@ -30,7 +30,8 @@ public class EnemyController : MonoBehaviour
     public Collider _enemyAttackCollider;
     private float attackTimer; // 近接攻撃のタイマー
     [SerializeField]private float attackInterval = 3f; // 近接攻撃の間隔
-    private HpController _hpController;
+    [SerializeField] private HpController _hpController;
+    Damager damager;
 
     private void Start()
     {
@@ -45,6 +46,7 @@ public class EnemyController : MonoBehaviour
         SetRandomDestination();
 
         _hpController = GetComponent<HpController>();
+        //damager = GetComponent<Damager>();
         _anim = GetComponent<Animator>();
     }
 
@@ -107,8 +109,6 @@ public class EnemyController : MonoBehaviour
 
         // プレイヤーに向かって移動する
         transform.position = Vector3.MoveTowards(transform.position, player.position, Time.deltaTime * _chaseSpeed);
-        //_anim.SetBool("Chase",_chaseAnim);
-        //_anim.SetTrigger("Chase");
         _anim.SetBool("Chase", true);
 
         if (distanceToPlayer >= _chaseRadius)// プレイヤーが追跡半径の範囲外の場合
@@ -136,6 +136,7 @@ public class EnemyController : MonoBehaviour
         {
             _anim.SetTrigger("EnemyAttack");
             attackTimer = 0f;
+            //StartCoroutine(_hpController.Attacked(damager.damage));
         }
     }
 
@@ -156,16 +157,17 @@ public class EnemyController : MonoBehaviour
             //敵の剣に当たったら被ダメアニメーション発生
             _anim.SetTrigger("Damage");
             _hpController.Damage(damager.damage);
-            
         }
     }
     //武器の判定を有効or無効切り替える
-    public void OffColliderAttack()
+    public void EnemyOffColliderAttack()
     {
         _enemyAttackCollider.enabled = false;
+        Debug.Log("Emeny Off");
     }
-    public void OnColliderAttack()
+    public void EnemyOnColliderAttack()
     {
         _enemyAttackCollider.enabled = true;
+        Debug.Log("Emeny On");
     }
 }

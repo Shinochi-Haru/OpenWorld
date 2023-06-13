@@ -13,6 +13,9 @@ public class HpController : MonoBehaviour
     [SerializeField] Text text;
     [SerializeField] Slider slider;
     [SerializeField] Image sliderFill;
+    [SerializeField] Color color25;
+    [SerializeField] Color color05;
+    [SerializeField] Color color1;
     //アニメーションの時間
     [SerializeField] float animTime;
 

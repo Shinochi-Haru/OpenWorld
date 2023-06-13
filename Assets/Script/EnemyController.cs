@@ -46,7 +46,7 @@ public class EnemyController : MonoBehaviour
         SetRandomDestination();
 
         _hpController = GetComponent<HpController>();
-        //damager = GetComponent<Damager>();
+        damager = GetComponent<Damager>();
         _anim = GetComponent<Animator>();
     }
 
@@ -157,6 +157,7 @@ public class EnemyController : MonoBehaviour
             //敵の剣に当たったら被ダメアニメーション発生
             _anim.SetTrigger("Damage");
             _hpController.Damage(damager.damage);
+            StartCoroutine(_hpController.Attacked(damager.damage));
         }
     }
     //武器の判定を有効or無効切り替える

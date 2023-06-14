@@ -2499,6 +2499,7 @@ GameObject:
   - component: {fileID: 5181382830251428047}
   - component: {fileID: 5181382830251428039}
   - component: {fileID: 5181382830251428037}
+  - component: {fileID: 7091749287496415580}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2643,6 +2644,24 @@ MonoBehaviour:
   color05: {r: 0.7924528, g: 0.7889552, b: 0, a: 0}
   color1: {r: 0.09620416, g: 1, b: 0, a: 0}
   animTime: 0.1
+--- !u!114 &7091749287496415580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8631749762997142237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae3e7cfac16b45046ad59bf0adaad3ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxSp: 100
+  text: {fileID: 0}
+  slider: {fileID: 0}
+  sliderFill: {fileID: 0}
+  animTime: 0
+  staminaDecreaseRate: 1
 --- !u!1 &9067797130782295243
 GameObject:
   m_ObjectHideFlags: 0

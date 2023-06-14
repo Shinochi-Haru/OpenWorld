@@ -76,6 +76,16 @@ public class HpController : MonoBehaviour
             .SetEase(Ease.Linear)
             .OnUpdate(() => UpdateUI(animHP));
     }
+
+    public void RecoverHealth(int amount)
+    {
+        CurrentHp += amount;
+        if (CurrentHp > _maxHp)
+        {
+            CurrentHp = _maxHp;
+        }
+        UpdateUI(CurrentHp);
+    }
     public void Damage(int damage)
     {
         CurrentHp -= damage;
@@ -85,5 +95,6 @@ public class HpController : MonoBehaviour
             animator.SetTrigger("Death");
             Destroy(gameObject, 10f);
         }
+        UpdateUI(CurrentHp);
     }
 }

@@ -17,18 +17,20 @@ public class StaminaController : MonoBehaviour
     [SerializeField] float animTime;
     [SerializeField] float staminaDecreaseRate = 1f; // スタミナの減少速度
 
+    private float currentSp; // 現在のスタミナ値
+
     void Start()
     {
         animator = GetComponent<Animator>();
         _sp = _maxSp;
-        UpdateUI(_sp);
+        currentSp = _maxSp; // 初期値を最大スタミナに設定
+        UpdateUI(currentSp);
     }
 
     //UI(スライダーとテキスト)
     void UpdateUI(float animHP)
     {
         //UIを変更
-        //text.text = $"{(int)animHP}/{_maxHp}";
         slider.value = animHP / _maxSp;
 
         sliderFill.color = Color.yellow;
@@ -43,37 +45,43 @@ public class StaminaController : MonoBehaviour
     // スタミナを減少させるメソッド
     void DecreaseStamina(float amount)
     {
-        _sp -= (int)amount;
-        if (_sp < 0)
+        currentSp -= amount;
+        if (currentSp < 0)
         {
-            _sp = 0;
+            currentSp = 0;
+            animator.SetTrigger("Death");
+            Destroy(gameObject, 10f);
         }
 
-        UpdateUI(_sp);
+        UpdateUI(currentSp);
     }
 
     public void RecoverStamina(int amount)
     {
-        _sp += amount;
-        if (_sp > _maxSp)
+        currentSp += amount;
+        if (currentSp > _maxSp)
         {
-            _sp = _maxSp;
+            currentSp = _maxSp;
         }
 
-        UpdateUI(_sp);
+        UpdateUI(currentSp);
     }
 
     public IEnumerator Attacked(int damage)
     {
         //ダメージを与える前のHPを取得
-        float animSP = _sp;
+        float startSP = currentSp;
 
         //ダメージを与えた後のHPを計算
-        _sp -= damage;
+        currentSp -= damage;
+        if (currentSp < 0)
+        {
+            currentSp = 0;
+        }
 
-        //HPを目的の値まで動かす
-        yield return DOTween.To(() => animSP, (x) => animSP = x, _sp, animTime)
+        // SPを目的の値まで徐々に動かす
+        yield return DOTween.To(() => startSP, (x) => startSP = x, currentSp, animTime)
             .SetEase(Ease.Linear)
-            .OnUpdate(() => UpdateUI(animSP));
+            .OnUpdate(() => UpdateUI(startSP));
     }
 }

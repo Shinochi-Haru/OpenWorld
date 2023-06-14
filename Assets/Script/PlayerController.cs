@@ -20,6 +20,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask groundLayer; // 地面と判定するレイヤー
     private Vector3 _groundCheckStartOffset;
     bool _isGrounded;
+    [SerializeField] private AudioClip[] outdoorFootstepSounds; // 野外の足音の効果音の配列
+    [SerializeField] private AudioClip[] indoorFootstepSounds; // 建物の足音の効果音の配列
+    [SerializeField] private AudioClip[] waterFootstepSounds;
+    [SerializeField] private AudioSource audioSource; // 効果音を再生するためのAudioSource
+
+
 
     void Start()
     {
@@ -62,6 +68,7 @@ public class PlayerController : MonoBehaviour
         if (transform.position.y < WaterHeight)
         {
             gravity = 0f;                                  // キャラクターが水面より下にいる場合は重力を無効化
+            PlayRandomFootstepSound(waterFootstepSounds);
         }
         else
         {
@@ -84,6 +91,14 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey("w"))
         {
             animator.SetFloat("IsRunning", movement.magnitude);
+            if (IsIndoor())
+            {
+                PlayRandomFootstepSound(indoorFootstepSounds);
+            }
+            else
+            {
+                PlayRandomFootstepSound(outdoorFootstepSounds);
+            }
         }
         else
         {
@@ -123,10 +138,41 @@ public class PlayerController : MonoBehaviour
         else if(_isGrounded == false)
         {
             animator.SetBool("Ground", _isGrounded);
+            audioSource.Stop();
         }
         else
         {
             animator.SetBool("Ground", _isGrounded);
+        }
+        if (!Input.GetKey("w") && !Input.GetKey("d") && !Input.GetKey("a") && !Input.GetKey("s"))
+        {
+            audioSource.Stop();
+        }
+
+    }
+    private bool IsIndoor()
+    {
+        // 建物内かどうかの判定ロジックを実装する
+        // 例: 建物内のColliderに接触しているかを判定して返す
+        // この例では"Building"というタグを持つColliderが建物を表すとしています
+        Collider[] colliders = Physics.OverlapSphere(transform.position, 1f);
+        foreach (var collider in colliders)
+        {
+            if (collider.CompareTag("Building"))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    private void PlayRandomFootstepSound(AudioClip[] footstepSounds)
+    {
+        // 効果音を再生
+        if (!audioSource.isPlaying)
+        {
+            // footstepSounds配列からランダムな効果音を選択
+            AudioClip footstepSound = footstepSounds[Random.Range(0, footstepSounds.Length)];
+            audioSource.PlayOneShot(footstepSound);
         }
     }
 

@@ -136,7 +136,6 @@ public class EnemyController : MonoBehaviour
         {
             _anim.SetTrigger("EnemyAttack");
             attackTimer = 0f;
-            //StartCoroutine(_hpController.Attacked(damager.damage));
         }
     }
 

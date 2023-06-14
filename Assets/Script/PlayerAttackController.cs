@@ -8,6 +8,8 @@ public class PlayerAttackController : MonoBehaviour
     [SerializeField]public Collider attackCollider;
     [SerializeField]HpController _hpController;
     Damager damager;
+    [SerializeField] private float knockbackForce = 10f; // ノックバックの力
+    [SerializeField] private float knockbackAngle = 45f; // ノックバックの角度（扇の開き具合）
     void Start()
     {
         attackCollider.enabled = false;
@@ -39,6 +41,17 @@ public class PlayerAttackController : MonoBehaviour
     {
         attackCollider.enabled = true;
         Debug.Log("on");
+    }
+    public void ApplyKnockback()
+    {
+        // 前方向ベクトルを取得
+        Vector3 forward = transform.forward;
+
+        // 扇状の範囲に対してプレーヤーに向かっての方向ベクトルを計算
+        Vector3 direction = Quaternion.AngleAxis(-knockbackAngle / 2, Vector3.up) * forward;
+
+        // プレーヤーに対しての方向ベクトルをノックバック力で乗算して力を与える
+        GetComponent<Rigidbody>().AddForce(direction * knockbackForce, ForceMode.Impulse);
     }
 
     //被ダメージアニメーションを発生させる

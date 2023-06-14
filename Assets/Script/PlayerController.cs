@@ -90,6 +90,31 @@ public class PlayerController : MonoBehaviour
             animator.SetFloat("IsRunning", 0f);
         }
 
+        if (Input.GetKey("d"))
+        {
+            animator.SetFloat("IsRunningD", movement.magnitude);
+        }
+        else
+        {
+            animator.SetFloat("IsRunningD", 0f);
+        }
+        if (Input.GetKey("a"))
+        {
+            animator.SetFloat("IsRunningA", movement.magnitude);
+        }
+        else
+        {
+            animator.SetFloat("IsRunningA", 0f);
+        }
+        if (Input.GetKey("s"))
+        {
+            animator.SetFloat("IsRunningS", movement.magnitude);
+        }
+        else
+        {
+            animator.SetFloat("IsRunningS", 0f);
+        }
+
         if (Input.GetButtonDown("Jump"))
         {
 
@@ -110,26 +135,6 @@ public class PlayerController : MonoBehaviour
         transform.Rotate(0, rotX * Time.deltaTime, 0);       // キャラクターを横回転
         //cam.transform.Rotate(-rotY * Time.deltaTime, 0, 0);  // カメラを縦回転
     }
-
-    ////bool IsGrounded()
-    ////{
-    ////    レイキャストを発射する開始地点と方向を設定
-    ////   Vector3 rayStart = transform.position + _groundCheckStartOffset;
-    ////    Vector3 rayDirection = Vector3.down;
-
-    ////    レイキャストを発射して地面との当たり判定を取得
-    ////    if (Physics.Raycast(rayStart, rayDirection, out RaycastHit hit, Mathf.Infinity, groundLayer))
-    ////    {
-    ////        地面との距離が一定以下であれば接地していると判定する
-    ////        float groundDistanceThreshold = 1f;
-    ////        if (hit.distance <= groundDistanceThreshold)
-    ////        {
-    ////            return true;
-    ////        }
-    ////    }
-
-    ////    return false;
-    ////}
     private void OnTriggerEnter(Collider other)
     {
         _isGrounded = true;

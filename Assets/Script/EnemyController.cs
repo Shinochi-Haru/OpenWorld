@@ -31,7 +31,7 @@ public class EnemyController : MonoBehaviour
     private float attackTimer; // 近接攻撃のタイマー
     [SerializeField]private float attackInterval = 3f; // 近接攻撃の間隔
     [SerializeField] private HpController _hpController;
-    Damager damager;
+    [SerializeField]Damager damager;
 
     private void Start()
     {
@@ -46,7 +46,7 @@ public class EnemyController : MonoBehaviour
         SetRandomDestination();
 
         _hpController = GetComponent<HpController>();
-        damager = GetComponent<Damager>();
+        //damager = GetComponent<Damager>();
         _anim = GetComponent<Animator>();
     }
 
@@ -151,7 +151,7 @@ public class EnemyController : MonoBehaviour
     //被ダメージアニメーションを発生させる
     private void OnTriggerEnter(Collider other)
     {
-        Damager damager = other.GetComponent<Damager>();
+        damager = other.GetComponent<Damager>();
         if (damager != null)
         {
             //敵の剣に当たったら被ダメアニメーション発生

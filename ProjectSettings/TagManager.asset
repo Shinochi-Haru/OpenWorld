@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - Building
   - Water
+  - Axe
   layers:
   - Default
   - TransparentFX

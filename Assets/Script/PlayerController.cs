@@ -116,8 +116,6 @@ public class PlayerController : MonoBehaviour
         if (transform.position.y < WaterHeight)
         {
             gravity = 0f;                                  // キャラクターが水面より下にいる場合は重力を無効化
-            audioSource2.clip = waterFootstepSounds;
-            audioSource2.Play();
         }
         else
         {

@@ -7,6 +7,8 @@ public class PlayerAttackController : MonoBehaviour
     Animator _anim;
     [SerializeField]public Collider attackCollider;
     [SerializeField]HpController _hpController;
+    [SerializeField] AudioSource _audio;
+    [SerializeField] AudioClip _damageSound;
     Damager damager;
     void Start()
     {
@@ -49,6 +51,7 @@ public class PlayerAttackController : MonoBehaviour
         {
             //敵の剣に当たったら被ダメアニメーション発生
             _anim.SetTrigger("Damage");
+            _audio.PlayOneShot(_damageSound);
             _hpController.Damage(damager.damage);
             StartCoroutine(_hpController.Attacked(damager.damage));
         }

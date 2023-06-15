@@ -33,8 +33,8 @@ public class HpController : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
-        _hp = _maxHp;
-        UpdateUI(_hp);
+        CurrentHp = _maxHp;
+        UpdateUI(CurrentHp);
     }
 
     //UI(スライダーとテキスト)

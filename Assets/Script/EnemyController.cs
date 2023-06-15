@@ -32,6 +32,7 @@ public class EnemyController : MonoBehaviour
     [SerializeField] AudioClip destructionSound; // 破壊時の音
     [SerializeField] AudioClip idleSound;
     [SerializeField] AudioClip chaseSound;
+    [SerializeField] AudioClip _damageSound;
     private AudioSource audioSource; // オーディオソース
 
     private void Start()
@@ -158,6 +159,7 @@ public class EnemyController : MonoBehaviour
             //敵の剣に当たったら被ダメアニメーション発生
             _anim.SetTrigger("Damage");
             _hpController.Damage(damager.damage);
+            audioSource.PlayOneShot(_damageSound);
             StartCoroutine(_hpController.Attacked(damager.damage));
         }
     }

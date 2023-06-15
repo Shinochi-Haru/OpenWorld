@@ -5,12 +5,14 @@ public class ItemController : MonoBehaviour
     public string itemName; // アイテムの名前
 
     private bool isPlayerInRange; // プレイヤーがアイテムの近くにいるかどうか
+    [SerializeField] AudioClip destructionSound;
 
     void Update()
     {
         if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
         {
             Use();
+            AudioSource.PlayClipAtPoint(destructionSound, transform.position);
             Destroy(gameObject);
         }
     }

@@ -112,6 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemName: b
+  destructionSound: {fileID: 8300000, guid: c8fc926d8f7500a4b8fbbe28072e84e9, type: 3}
 --- !u!114 &4190152548349335694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,4 +126,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemName: b
+  destructionSound: {fileID: 8300000, guid: c8fc926d8f7500a4b8fbbe28072e84e9, type: 3}
   healthAmount: 50

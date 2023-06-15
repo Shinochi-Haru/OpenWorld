@@ -26,13 +26,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip[] outdoorFootstepSounds; // 野外の足音の効果音の配列
     [SerializeField] private AudioClip[] indoorFootstepSounds; // 建物の足音の効果音の配列
     [SerializeField] private AudioClip[] waterFootstepSounds;
+    [SerializeField] private AudioClip axeSounds;
+    [SerializeField] private AudioClip shildSounds;
     [SerializeField] private AudioSource audioSource; // 効果音を再生するためのAudioSource
+    [SerializeField] private AudioSource audioSource2;
     StaminaController _stamina;
 
 
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         _stamina = GetComponent<StaminaController>();
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();                 // 自身にアタッチされているRigidbodyコンポーネントを取得
@@ -161,15 +165,22 @@ public class PlayerController : MonoBehaviour
         }
         if (!Input.GetKey("w") && !Input.GetKey("d") && !Input.GetKey("a") && !Input.GetKey("s"))
         {
-            audioSource.Stop();
+            if (audioSource.clip != outdoorFootstepSounds[0] && audioSource.clip != indoorFootstepSounds[0])
+            {
+                audioSource.Stop();
+            }
         }
-
+    }
+    void Audio1()
+    {
+        audioSource2.PlayOneShot(axeSounds);
+    }
+    void Audio2()
+    {
+        audioSource2.PlayOneShot(shildSounds);
     }
     private bool IsIndoor()
     {
-        // 建物内かどうかの判定ロジックを実装する
-        // 例: 建物内のColliderに接触しているかを判定して返す
-        // この例では"Building"というタグを持つColliderが建物を表すとしています
         Collider[] colliders = Physics.OverlapSphere(transform.position, 1f);
         foreach (var collider in colliders)
         {

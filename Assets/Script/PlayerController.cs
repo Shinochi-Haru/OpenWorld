@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour
     bool _isGrounded;
     [SerializeField] private AudioClip[] outdoorFootstepSounds; // 野外の足音の効果音の配列
     [SerializeField] private AudioClip[] indoorFootstepSounds; // 建物の足音の効果音の配列
-    [SerializeField] private AudioClip[] waterFootstepSounds;
+    [SerializeField] private AudioClip waterFootstepSounds;
     [SerializeField] private AudioClip axeSounds;
     [SerializeField] private AudioClip shildSounds;
     [SerializeField] private AudioSource audioSource; // 効果音を再生するためのAudioSource
@@ -58,12 +58,16 @@ public class PlayerController : MonoBehaviour
             movement = new Vector3(moveFB, gravity, moveLR);   // 移動量をベクトルとして設定
             movement = transform.rotation * movement;            // 移動量をキャラクターのローカル座標系に変換
             rb.velocity = movement;
+            ResetAnimationSpeed();
+            ResetAudioSpeed();
         }
         else if(_stamina.currentSp <= 0)
         {
             _slowmovement = new Vector3(_slowmoveFB, gravity, _slowmoveLR);   // 移動量をベクトルとして設定
             _slowmovement = transform.rotation * _slowmovement;            // 移動量をキャラクターのローカル座標系に変換
             rb.velocity = _slowmovement;
+            SlowDownAnimationSpeed();
+            SlowDownAudioSpeed();
         }
 
         rotX = Input.GetAxis("Mouse X") * sensitivity;     // マウスの X 軸移動量に基づいて横回転量を計算
@@ -81,13 +85,39 @@ public class PlayerController : MonoBehaviour
             CameraRotation(cam, rotX, rotY);                 // WebGL での右クリック回転が無効な場合、常にマウスの移動量に基づいてカメラを回転
         }
     }
+    [SerializeField] private float _audioSlowSpeed = 0.5f; // 遅い再生スピードの設定値
 
+    // 再生スピードを遅くする
+    public void SlowDownAudioSpeed()
+    {
+        audioSource.pitch = _audioSlowSpeed;
+    }
+
+    // 再生スピードを元の速度に戻す
+    public void ResetAudioSpeed()
+    {
+        audioSource.pitch = 1f;
+    }
+    [SerializeField] private float slowSpeed = 0.5f; // 遅い再生スピードの設定値
+
+    // 再生スピードを遅くする
+    public void SlowDownAnimationSpeed()
+    {
+        animator.speed = slowSpeed;
+    }
+
+    // 再生スピードを元の速度に戻す
+    public void ResetAnimationSpeed()
+    {
+        animator.speed = 1f;
+    }
     void CheckForWaterHeight()
     {
         if (transform.position.y < WaterHeight)
         {
             gravity = 0f;                                  // キャラクターが水面より下にいる場合は重力を無効化
-            PlayRandomFootstepSound(waterFootstepSounds);
+            audioSource2.clip = waterFootstepSounds;
+            audioSource2.Play();
         }
         else
         {

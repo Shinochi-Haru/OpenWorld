@@ -11,6 +11,7 @@ public class ItemController : MonoBehaviour
         if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
         {
             Use();
+            Destroy(gameObject);
         }
     }
 
@@ -19,7 +20,6 @@ public class ItemController : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInRange = true;
-            Debug.Log("Press 'E' to interact with the " + itemName);
         }
     }
 

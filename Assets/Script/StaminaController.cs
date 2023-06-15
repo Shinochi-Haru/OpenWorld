@@ -17,7 +17,7 @@ public class StaminaController : MonoBehaviour
     [SerializeField] float animTime;
     [SerializeField] float staminaDecreaseRate = 1f; // スタミナの減少速度
 
-    private float currentSp; // 現在のスタミナ値
+    public float currentSp; // 現在のスタミナ値
 
     void Start()
     {
@@ -49,8 +49,6 @@ public class StaminaController : MonoBehaviour
         if (currentSp < 0)
         {
             currentSp = 0;
-            animator.SetTrigger("Death");
-            Destroy(gameObject, 10f);
         }
 
         UpdateUI(currentSp);

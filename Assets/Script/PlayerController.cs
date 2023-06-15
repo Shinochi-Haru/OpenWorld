@@ -5,17 +5,20 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField]public float speed = 10.0f;                     // キャラクターの移動速度
+    [SerializeField]public float _speed = 10.0f;                     // キャラクターの移動速度
+    [SerializeField] public float _slowspeed = 10.0f;
     [SerializeField] public float sensitivity = 30.0f;               // マウスの感度
     [SerializeField] float WaterHeight = 15.5f;               // 水面の高さ
     Rigidbody rb;                                   // Rigidbody コンポーネントへの参照
     [SerializeField] public GameObject cam;                          // カメラオブジェクトへの参照
     float moveFB, moveLR;                            // 前後左右の移動量
+    float _slowmoveFB, _slowmoveLR;
     float rotX, rotY;                                // マウスの回転量
     [SerializeField] public bool webGLRightClickRotation = true;      // WebGL において右クリックでの回転を有効にするかのフラグ
     [SerializeField]float gravity = -9.8f;                           // 重力の値
     private Animator animator;
     Vector3 movement;
+    Vector3 _slowmovement;
     [SerializeField] float _jumpPower;
     [SerializeField] LayerMask groundLayer; // 地面と判定するレイヤー
     private Vector3 _groundCheckStartOffset;
@@ -24,11 +27,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip[] indoorFootstepSounds; // 建物の足音の効果音の配列
     [SerializeField] private AudioClip[] waterFootstepSounds;
     [SerializeField] private AudioSource audioSource; // 効果音を再生するためのAudioSource
+    StaminaController _stamina;
 
 
 
     void Start()
     {
+        _stamina = GetComponent<StaminaController>();
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();                 // 自身にアタッチされているRigidbodyコンポーネントを取得
         if (Application.isEditor)
@@ -40,12 +45,22 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        moveFB = Input.GetAxis("Horizontal") * speed;      // 水平方向（左右）の入力に基づいて移動量を計算
-        moveLR = Input.GetAxis("Vertical") * speed;        // 垂直方向（前後）の入力に基づいて移動量を計算
-
-        movement = new Vector3(moveFB, gravity, moveLR);   // 移動量をベクトルとして設定
-        movement = transform.rotation * movement;            // 移動量をキャラクターのローカル座標系に変換
-        rb.velocity = movement;
+        moveFB = Input.GetAxis("Horizontal") * _speed;      // 水平方向（左右）の入力に基づいて移動量を計算
+        moveLR = Input.GetAxis("Vertical") * _speed;        // 垂直方向（前後）の入力に基づいて移動量を計算
+        _slowmoveFB = Input.GetAxis("Horizontal") * _slowspeed;      // 水平方向（左右）の入力に基づいて移動量を計算
+        _slowmoveLR = Input.GetAxis("Vertical") * _slowspeed;        // 垂直方向（前後）の入力に基づいて移動量を計算
+        if(_stamina.currentSp > 0)
+        {
+            movement = new Vector3(moveFB, gravity, moveLR);   // 移動量をベクトルとして設定
+            movement = transform.rotation * movement;            // 移動量をキャラクターのローカル座標系に変換
+            rb.velocity = movement;
+        }
+        else if(_stamina.currentSp <= 0)
+        {
+            _slowmovement = new Vector3(_slowmoveFB, gravity, _slowmoveLR);   // 移動量をベクトルとして設定
+            _slowmovement = transform.rotation * _slowmovement;            // 移動量をキャラクターのローカル座標系に変換
+            rb.velocity = _slowmovement;
+        }
 
         rotX = Input.GetAxis("Mouse X") * sensitivity;     // マウスの X 軸移動量に基づいて横回転量を計算
         rotY = Input.GetAxis("Mouse Y") * sensitivity;     // マウスの Y 軸移動量に基づいて縦回転量を計算

@@ -93,7 +93,7 @@ public class HpController : MonoBehaviour
         {
             CurrentHp = 0;
             animator.SetTrigger("Death");
-            Destroy(gameObject, 10f);
+            Destroy(gameObject, 1f);
         }
         UpdateUI(CurrentHp);
     }

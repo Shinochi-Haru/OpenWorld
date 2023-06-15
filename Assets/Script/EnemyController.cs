@@ -11,14 +11,11 @@ public class EnemyController : MonoBehaviour
         Attack
     }
 
-    HpController _hp;
-    private EnemyState currentState; // 現在のステート
-    private float idleTimer; // アイドル状態の経過時間
-    private Vector3 idleDestination; // アイドル時の目的地
-    [SerializeField] Transform player; // プレイヤーのTransformコンポーネント
+    private EnemyState _currentState; // 現在のステート
+    [SerializeField] Transform _player; // プレイヤーのTransformコンポーネント
     [SerializeField] float _chaseRadius = 20f; // 追跡半径
     [SerializeField] float _attackRadius = 20f; // 追跡半径
-    float distanceToPlayer = 0f;
+    float _distanceToPlayer = 0f;
     [SerializeField]private float moveTimer; // 方向転換のタイマー
     private float moveDuration = 10f; // 方向転換の間隔
     private Vector3 randomDestination; // ランダムな目的地
@@ -27,57 +24,63 @@ public class EnemyController : MonoBehaviour
     [SerializeField] float _walkSpeed = 0;
     [SerializeField] float _chaseSpeed = 0;
     private Animator _anim; // Animatorコンポーネント
-    public Collider _enemyAttackCollider;
+    [SerializeField]public Collider _enemyAttackCollider;
     private float attackTimer; // 近接攻撃のタイマー
     [SerializeField]private float attackInterval = 3f; // 近接攻撃の間隔
     [SerializeField] private HpController _hpController;
     [SerializeField]Damager damager;
+    [SerializeField] AudioClip destructionSound; // 破壊時の音
+    [SerializeField] AudioClip idleSound;
+    [SerializeField] AudioClip chaseSound;
+    private AudioSource audioSource; // オーディオソース
 
     private void Start()
     {
-        //_chaseOnOff = false;
         _enemyAttackCollider.enabled = false;
         // 初期状態を設定
-        currentState = EnemyState.Idle;
-
+        _currentState = EnemyState.Idle;
         // 初期位置を保存
         initialPosition = transform.position;
         // 初期のランダムな目的地を設定
         SetRandomDestination();
-
         _hpController = GetComponent<HpController>();
-        //damager = GetComponent<Damager>();
         _anim = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void Update()
     {
         // 状態に応じた処理を実行
-        switch (currentState)
+        switch (_currentState)
         {
             case EnemyState.Idle:
                 UpdateIdleState();
+                audioSource.clip = idleSound;
                 break;
             case EnemyState.Chase:
                 UpdateChaseState();
+                audioSource.clip = chaseSound;
                 break;
             case EnemyState.Attack:
                 UpdateAttackState();
                 break;
         }
+        if (!audioSource.isPlaying)
+        {
+            audioSource.Play();
+        }
         // プレイヤーと敵の距離を計算
-        distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        _distanceToPlayer = Vector3.Distance(transform.position, _player.position);
     }
 
     private void UpdateIdleState()
     {
         // アイドル状態の処理
-        idleTimer += Time.deltaTime;
         moveTimer += Time.deltaTime;
 
-        if (distanceToPlayer <= _chaseRadius) // プレイヤーが追跡半径に近づいた場合
+        if (_distanceToPlayer <= _chaseRadius) // プレイヤーが追跡半径に近づいた場合
         {
-            currentState = EnemyState.Chase;
+            _currentState = EnemyState.Chase;
         }
         else
         {
@@ -103,32 +106,31 @@ public class EnemyController : MonoBehaviour
     private void UpdateChaseState()
     {
         // プレイヤーの方向を向く
-        Vector3 direction = (player.position - transform.position).normalized;
+        Vector3 direction = (_player.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0f, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
 
         // プレイヤーに向かって移動する
-        transform.position = Vector3.MoveTowards(transform.position, player.position, Time.deltaTime * _chaseSpeed);
+        transform.position = Vector3.MoveTowards(transform.position, _player.position, Time.deltaTime * _chaseSpeed);
         _anim.SetBool("Chase", true);
 
-        if (distanceToPlayer >= _chaseRadius)// プレイヤーが追跡半径の範囲外の場合
+        if (_distanceToPlayer >= _chaseRadius)// プレイヤーが追跡半径の範囲外の場合
         {
-            currentState = EnemyState.Idle;
+            _currentState = EnemyState.Idle;
             _anim.SetBool("Chase", false);
         }
-        if (distanceToPlayer <= _attackRadius)// プレイヤーが追跡半径の範囲内の場合
+        if (_distanceToPlayer <= _attackRadius)// プレイヤーが追跡半径の範囲内の場合
         {
-            currentState = EnemyState.Attack;
+            _currentState = EnemyState.Attack;
             _anim.SetBool("Chase", false);
         }
-
     }
 
     private void UpdateAttackState()
     {
-        if (distanceToPlayer >= _attackRadius && distanceToPlayer <= _chaseRadius)// プレイヤーが追跡半径の範囲外の場合
+        if (_distanceToPlayer >= _attackRadius && _distanceToPlayer <= _chaseRadius)// プレイヤーが追跡半径の範囲外の場合
         {
-            currentState = EnemyState.Chase;
+            _currentState = EnemyState.Chase;
         }
         attackTimer += Time.deltaTime;
 

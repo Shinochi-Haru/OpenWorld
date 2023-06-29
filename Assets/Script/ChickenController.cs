@@ -71,7 +71,6 @@ public class ChickenController : MonoBehaviour
     {
         
         /// アイドル状態の処理
-        idleTimer += Time.deltaTime;
         moveTimer += Time.deltaTime;
         if (distanceToPlayer <= _walkRadius) // プレイヤーが追跡半径に近づいた場合
         {

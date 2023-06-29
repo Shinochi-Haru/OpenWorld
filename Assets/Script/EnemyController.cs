@@ -145,8 +145,13 @@ public class EnemyController : MonoBehaviour
     private void SetRandomDestination()
     {
         // ランダムな方向に移動する目的地を設定
+        // ランダムな方向ベクトルを作成する
         Vector2 randomDirection = Random.insideUnitCircle.normalized;
+
+        // ランダムな方向ベクトルを3D空間に拡張する
         Vector3 direction3D = new Vector3(randomDirection.x, 0f, randomDirection.y);
+
+        // 目的地を初期位置からランダムな方向ベクトルと移動半径を考慮して計算する
         randomDestination = initialPosition + direction3D * Random.Range(0f, moveRadius);
     }
 
